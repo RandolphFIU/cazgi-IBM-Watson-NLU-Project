@@ -23,10 +23,45 @@ function getNLUInstance() {
 }
 
 
+  let analyzeParamsText = {
+    'text': '',
+    'features': {
+        'emotion': {
+          },
+        'sentiment': {
+          },
+    },
+  };
+
+  let analyzeParamsUrl = {
+    'url': '',
+    'features': {
+        'emotion': {
+        },
+      'sentiment': {
+        },
+    },
+  };
+
+  let analyzeParamsTextSentiment = {
+    'text': '',
+    'features': {
+        'sentiment': {
+          }
+        }
+  };
+
+  let analyzeParamsURLSentiment = {
+    'url': '',
+    'features': {
+        'sentiment': {
+          }
+        }
+  };
+
 
 
 app.use(express.static('client'))
-
 const cors_app = require('cors');
 app.use(cors_app());
 
@@ -34,22 +69,92 @@ app.get("/",(req,res)=>{
     res.render('index.html');
   });
 
+// ENDPOINTS ///////////////////////////////////////////////////
+
 app.get("/url/emotion", (req,res) => {
 
-    return res.send({"happy":"90","sad":"10"});
+    console.log(req.query);
+    console.log(req.query.url);
+
+    analyzeParamsUrl.url = req.query.url;
+    let emotions;
+
+    getNLUInstance().analyze(analyzeParamsUrl)
+    .then(analysisResults => {
+
+        emotions = JSON.stringify(analysisResults.result.emotion.document.emotion, null, 2);
+        console.log("\nWasabi\n" + emotions);
+        return res.send(emotions);;
+      })
+      .catch(err => {
+        console.log('error:', err);
+      });   
+
 });
 
 app.get("/url/sentiment", (req,res) => {
-    return res.send("url sentiment for "+req.query.url);
+
+    console.log(req.query);
+    console.log(req.query.url);
+
+    analyzeParamsURLSentiment.url = req.query.url;
+    let sentiment;
+
+    getNLUInstance().analyze(analyzeParamsURLSentiment)
+    .then(analysisResults => {
+
+        sentiment = JSON.stringify(analysisResults.result.sentiment.document, null, 2);
+        console.log("\nWasabi\n" + sentiment);
+        return res.send(JSON.stringify(sentiment, null, 2));;
+      })
+      .catch(err => {
+        console.log('error:', err);
+      });   
+
+    // return res.send("url sentiment for "+req.query.url);
 });
 
 app.get("/text/emotion", (req,res) => {
-    return res.send({"happy":"10","sad":"90"});
+
+
+    analyzeParamsText.text = req.query.text;
+    console.log(analyzeParamsText)
+    let emotions;
+
+    getNLUInstance().analyze(analyzeParamsText)
+    .then(analysisResults => {
+
+        //emotions = JSON.stringify(analysisResults.result.keywords[0].emotion, null, 2);
+        emotions = JSON.stringify(analysisResults.result.emotion.document.emotion, null, 2);
+        console.log("\nWasabi\n" + emotions);
+        return res.send(emotions);;
+      })
+      .catch(err => {
+        console.log('error:', err);
+      });     
+
 });
 
 app.get("/text/sentiment", (req,res) => {
-    return res.send("text sentiment for "+req.query.text);
-});
+
+    // console.log(req.query);
+    console.log(req.query.text);
+
+    analyzeParamsTextSentiment.text = req.query.text;
+    let sentiment;
+
+    getNLUInstance().analyze(analyzeParamsTextSentiment)
+    .then(analysisResults => {
+
+        sentiment = JSON.stringify(analysisResults.result.sentiment.document, null, 2);
+        console.log("\nWasabi\n" + sentiment);
+        return res.send(JSON.stringify(sentiment, null, 2));;
+      })
+      .catch(err => {
+        console.log('error:', err);
+      });  
+
+}); 
 
 let server = app.listen(8080, () => {
     console.log('Listening', server.address().port)

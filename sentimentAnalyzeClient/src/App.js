@@ -4,12 +4,15 @@ import EmotionTable from './EmotionTable.js';
 import React from 'react';
 import axios from 'axios';
 
+
 class App extends React.Component {
+
   state = {innercomp:<textarea rows="4" cols="50" id="textinput"/>,
             mode: "text",
           sentimentOutput:[],
           sentiment:true
         }
+
   
   renderTextArea = ()=>{
     document.getElementById("textinput").value = "";
@@ -46,16 +49,20 @@ class App extends React.Component {
     ret = axios.get(url);
     ret.then((response)=>{
 
-      //Include code here to check the sentiment and fomrat the data accordingly
+      //Include code here to check the sentiment and format the data accordingly
+      console.log("oye\n", response.data);
 
       this.setState({sentimentOutput:response.data});
+
+      let  obj = JSON.parse(response.data);
       let output = response.data;
-      if(response.data === "positive") {
-        output = <div style={{color:"green",fontSize:20}}>{response.data}</div>
-      } else if (response.data === "negative"){
-        output = <div style={{color:"red",fontSize:20}}>{response.data}</div>
+      
+      if(obj['label'] === "positive") {
+        output = <div style={{color:"green",fontSize:40}}>{response.data}</div>
+      } else if (obj['label'] === "negative"){
+        output = <div style={{color:"red",fontSize:40}}>{response.data}</div>
       } else {
-        output = <div style={{color:"orange",fontSize:20}}>{response.data}</div>
+        output = <div style={{color:"yellow",fontSize:40}}>{response.data}</div>
       }
       this.setState({sentimentOutput:output});
     });
@@ -75,6 +82,10 @@ class App extends React.Component {
     ret.then((response)=>{
       this.setState({sentimentOutput:<EmotionTable emotions={response.data}/>});
   });
+  }
+
+  componentDidMount() {
+    document.title = "Sentiment Analyzer";
   }
   
 
